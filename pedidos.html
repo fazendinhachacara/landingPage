@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pedidos · Chácara Fazendinha</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#3F4348">
+<link rel="icon" type="image/png" href="img/brasao.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&amp;family=Figtree:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Figtree','Segoe UI',system-ui,sans-serif;color:#24272B;background:#F5F0E8;font-size:17px;line-height:1.6}
+[hidden]{display:none !important}
+h1{font-family:'Bricolage Grotesque',Georgia,serif}
+a{color:#2F68B0}
+:focus-visible{outline:3px solid #2F68B0;outline-offset:3px;border-radius:6px}
+
+.topo{background:#FFFFFF;border-bottom:1px solid #E2D9CB}
+.topo .interno{max-width:1120px;margin:0 auto;padding:16px 24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px}
+.marca{display:flex;align-items:center;gap:12px}
+.marca img{height:48px;width:auto;display:block}
+.marca span{font-family:'Bricolage Grotesque',Georgia,serif;font-weight:700;font-size:18px}
+
+main{max-width:1120px;margin:0 auto;padding:40px 24px 80px}
+
+.campo{display:flex;flex-direction:column;gap:6px;font-size:15px;font-weight:600;margin-bottom:16px}
+.campo input,select{width:100%;min-height:48px;padding:12px 14px;border:1px solid #CFC4B2;border-radius:12px;background:#FFFFFF;font:inherit;font-weight:400;color:#24272B}
+.btn{min-height:48px;padding:0 24px;border:0;border-radius:999px;background:#3F4348;color:#FFFFFF;font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{background:#2A2D31}
+.btn:disabled{opacity:.6;cursor:default}
+.btn.secundario{background:transparent;color:#24272B;border:1.5px solid #24272B}
+.btn.secundario:hover{background:rgba(0,0,0,.05)}
+.btn.pequeno{min-height:40px;padding:0 16px;font-size:15px}
+
+.login{max-width:420px;margin:60px auto;background:#FFFFFF;border:1px solid #E2D9CB;border-radius:20px;padding:32px 28px}
+.login h1{margin:0 0 8px;font-size:28px}
+.login p.sub{margin:0 0 24px;color:#5A5E63;font-size:15px}
+
+.filtros{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:24px}
+.filtros select{min-width:180px;width:auto}
+.contagem{color:#5A5E63;font-size:15px;margin-left:auto;padding-bottom:12px}
+
+.lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px;align-items:start}
+.card{background:#FFFFFF;border:1px solid #E2D9CB;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:12px}
+.card.atendido{background:#FAF7F2;border-style:dashed}
+.etiquetas{display:flex;flex-wrap:wrap;gap:8px}
+.tag{font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
+.tag.oracao{background:#E3EAF5;color:#234A7D}
+.tag.visita{background:#F7E6CF;color:#7A4E12}
+.tag.pendente{background:#3F4348;color:#FFFFFF}
+.tag.feito{background:#DCEDE1;color:#2A6B3F}
+.tag.anon{background:#EFEAE1;color:#5A5E63}
+.tag.sem-autorizacao{background:#F6DEDE;color:#9B2C2C}
+.quem{display:flex;flex-direction:column;gap:2px}
+.quem strong{font-size:19px}
+.quem .meta{font-size:14px;color:#5A5E63}
+.texto{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.dados{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;font-size:15px;color:#3A3D42;overflow-wrap:anywhere}
+.dados strong{color:#24272B}
+.acoes{display:flex;flex-wrap:wrap;gap:8px;padding-top:12px;border-top:1px solid #EFE8DC}
+.vazio{grid-column:1/-1;text-align:center;color:#5A5E63;padding:60px 24px;background:#FFFFFF;border:1px dashed #CFC4B2;border-radius:20px}
+.erro{color:#9B2C2C;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="topo">
+<div class="interno">
+<div class="marca">
+<img src="img/brasao.png" alt="">
+<span>Pedidos recebidos</span>
+</div>
+<div id="sessao" hidden style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+<span id="quem-logou" style="font-size:15px;color:#5A5E63"></span>
+<button type="button" class="btn secundario pequeno" id="sair">Sair</button>
+</div>
+</div>
+</div>
+
+<main>
+
+<form class="login" id="form-login">
+<h1>Acesso da liderança</h1>
+<p class="sub">Esta página mostra os pedidos de oração e visita enviados pelo site. O acesso é só para quem a igreja cadastrou.</p>
+<label class="campo"><span>E-mail</span><input type="email" name="email" required autocomplete="username"></label>
+<label class="campo"><span>Senha</span><input type="password" name="senha" required autocomplete="current-password"></label>
+<button type="submit" class="btn" style="width:100%">Entrar</button>
+<p id="login-status" role="status" aria-live="polite" style="margin:16px 0 0;font-size:15px"></p>
+</form>
+
+<div id="painel" hidden>
+<div class="filtros">
+<label class="campo" style="margin:0"><span>Tipo</span>
+<select id="filtro-tipo">
+<option value="todos">Oração e visita</option>
+<option value="oracao">Só oração</option>
+<option value="visita">Só visita</option>
+</select>
+</label>
+<label class="campo" style="margin:0"><span>Situação</span>
+<select id="filtro-status">
+<option value="pendente">Pendentes</option>
+<option value="atendido">Atendidos</option>
+<option value="todos">Todos</option>
+</select>
+</label>
+<span class="contagem" id="contagem"></span>
+</div>
+<div class="lista" id="lista"></div>
+</div>
+
+</main>
+
+<script type="module">
+import { firebaseConfig } from './firebase-config.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp, deleteField } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const formLogin = document.getElementById('form-login');
+const loginStatus = document.getElementById('login-status');
+const painel = document.getElementById('painel');
+const sessao = document.getElementById('sessao');
+const lista = document.getElementById('lista');
+const contagem = document.getElementById('contagem');
+const filtroTipo = document.getElementById('filtro-tipo');
+const filtroStatus = document.getElementById('filtro-status');
+
+let pedidos = [];
+let parar = null;
+
+const MENSAGENS = {
+  'auth/invalid-credential': 'E-mail ou senha incorretos.',
+  'auth/invalid-email': 'E-mail inválido.',
+  'auth/user-not-found': 'E-mail ou senha incorretos.',
+  'auth/wrong-password': 'E-mail ou senha incorretos.',
+  'auth/too-many-requests': 'Muitas tentativas. Espere alguns minutos e tente de novo.',
+  'auth/network-request-failed': 'Sem conexão. Verifique a internet.'
+};
+
+formLogin.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const botao = formLogin.querySelector('button');
+  botao.disabled = true;
+  loginStatus.textContent = 'Entrando...';
+  loginStatus.className = '';
+  try {
+    await signInWithEmailAndPassword(auth, formLogin.elements.email.value.trim(), formLogin.elements.senha.value);
+  } catch (e) {
+    loginStatus.textContent = MENSAGENS[e.code] || 'Não foi possível entrar. Tente de novo.';
+    loginStatus.className = 'erro';
+    console.error(e);
+  } finally {
+    botao.disabled = false;
+    formLogin.elements.senha.value = '';
+  }
+});
+
+document.getElementById('sair').addEventListener('click', () => signOut(auth));
+
+onAuthStateChanged(auth, (usuario) => {
+  if (usuario) {
+    formLogin.hidden = true;
+    painel.hidden = false;
+    sessao.hidden = false;
+    document.getElementById('quem-logou').textContent = usuario.email;
+    loginStatus.textContent = '';
+    escutar();
+  } else {
+    if (parar) { parar(); parar = null; }
+    pedidos = [];
+    lista.innerHTML = '';
+    formLogin.hidden = false;
+    painel.hidden = true;
+    sessao.hidden = true;
+  }
+});
+
+function escutar() {
+  if (parar) return;
+  parar = onSnapshot(
+    query(collection(db, 'pedidos'), orderBy('criadoEm', 'desc')),
+    (snap) => { pedidos = snap.docs.map(d => ({ id: d.id, ...d.data() })); desenhar(); },
+    (e) => {
+      console.error(e);
+      lista.innerHTML = '';
+      const aviso = document.createElement('p');
+      aviso.className = 'vazio erro';
+      aviso.textContent = 'Não foi possível carregar os pedidos. Confira as regras de segurança do Firestore.';
+      lista.append(aviso);
+    }
+  );
+}
+
+function dataLegivel(ts) {
+  // Enquanto o servidor não confirma a gravação, criadoEm chega nulo no primeiro evento.
+  if (!ts || !ts.toDate) return 'agora mesmo';
+  return ts.toDate().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function soDigitos(t) { return String(t || '').replace(/\D/g, ''); }
+
+function etiqueta(texto, classe) {
+  const s = document.createElement('span');
+  s.className = 'tag ' + classe;
+  s.textContent = texto;
+  return s;
+}
+
+function linha(rotulo, valor) {
+  const li = document.createElement('li');
+  const b = document.createElement('strong');
+  b.textContent = rotulo + ': ';
+  li.append(b, document.createTextNode(valor));
+  return li;
+}
+
+function cartao(p) {
+  const card = document.createElement('article');
+  card.className = 'card' + (p.status === 'atendido' ? ' atendido' : '');
+
+  const tags = document.createElement('div');
+  tags.className = 'etiquetas';
+  tags.append(etiqueta(p.tipo === 'visita' ? 'Visita' : 'Oração', p.tipo === 'visita' ? 'visita' : 'oracao'));
+  tags.append(etiqueta(p.status === 'atendido' ? 'Atendido' : 'Pendente', p.status === 'atendido' ? 'feito' : 'pendente'));
+  if (p.anonimo) tags.append(etiqueta('Anônimo', 'anon'));
+  if (p.tipo === 'oracao' && !p.autorizaCompartilhar) tags.append(etiqueta('Não compartilhar', 'sem-autorizacao'));
+  card.append(tags);
+
+  const quem = document.createElement('div');
+  quem.className = 'quem';
+  const nome = document.createElement('strong');
+  nome.textContent = p.anonimo ? 'Pedido anônimo' : (p.nome || 'Sem nome informado');
+  const meta = document.createElement('span');
+  meta.className = 'meta';
+  meta.textContent = dataLegivel(p.criadoEm);
+  quem.append(nome, meta);
+  card.append(quem);
+
+  if (p.texto) {
+    const t = document.createElement('p');
+    t.className = 'texto';
+    t.textContent = p.texto;
+    card.append(t);
+  }
+
+  const dados = document.createElement('ul');
+  dados.className = 'dados';
+  if (p.telefone) {
+    const li = document.createElement('li');
+    const b = document.createElement('strong');
+    b.textContent = 'Telefone: ';
+    const a = document.createElement('a');
+    a.href = 'https://wa.me/55' + soDigitos(p.telefone);
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.textContent = p.telefone;
+    li.append(b, a);
+    dados.append(li);
+  }
+  if (p.endereco) dados.append(linha('Endereço', p.endereco));
+  if (p.horario) dados.append(linha('Melhor horário', p.horario));
+  if (p.observacao) dados.append(linha('Anotação', p.observacao));
+  if (p.status === 'atendido' && p.atendidoPor) dados.append(linha('Atendido por', p.atendidoPor));
+  if (dados.children.length) card.append(dados);
+
+  const acoes = document.createElement('div');
+  acoes.className = 'acoes';
+
+  const alternar = document.createElement('button');
+  alternar.type = 'button';
+  const jaAtendido = p.status === 'atendido';
+  alternar.className = 'btn pequeno' + (jaAtendido ? ' secundario' : '');
+  alternar.textContent = jaAtendido ? 'Reabrir' : (p.tipo === 'visita' ? 'Visita feita' : 'Oramos por este');
+  alternar.addEventListener('click', async () => {
+    alternar.disabled = true;
+    try {
+      await updateDoc(doc(db, 'pedidos', p.id), jaAtendido
+        ? { status: 'pendente', atendidoPor: deleteField(), atendidoEm: deleteField() }
+        : { status: 'atendido', atendidoPor: auth.currentUser.email, atendidoEm: serverTimestamp() });
+    } catch (e) { console.error(e); alternar.disabled = false; }
+  });
+  acoes.append(alternar);
+
+  const anotar = document.createElement('button');
+  anotar.type = 'button';
+  anotar.className = 'btn secundario pequeno';
+  anotar.textContent = p.observacao ? 'Editar anotação' : 'Anotar';
+  anotar.addEventListener('click', async () => {
+    const texto = window.prompt('Anotação sobre este pedido:', p.observacao || '');
+    if (texto === null) return;
+    try {
+      await updateDoc(doc(db, 'pedidos', p.id), { observacao: texto.trim().slice(0, 500) });
+    } catch (e) { console.error(e); }
+  });
+  acoes.append(anotar);
+
+  card.append(acoes);
+  return card;
+}
+
+function desenhar() {
+  const tipo = filtroTipo.value;
+  const status = filtroStatus.value;
+  const visiveis = pedidos.filter(p =>
+    (tipo === 'todos' || p.tipo === tipo) &&
+    (status === 'todos' || (p.status || 'pendente') === status)
+  );
+
+  lista.innerHTML = '';
+  if (!visiveis.length) {
+    const vazio = document.createElement('p');
+    vazio.className = 'vazio';
+    vazio.textContent = 'Nenhum pedido neste filtro.';
+    lista.append(vazio);
+  } else {
+    visiveis.forEach(p => lista.append(cartao(p)));
+  }
+  contagem.textContent = visiveis.length === 1 ? '1 pedido' : visiveis.length + ' pedidos';
+}
+
+filtroTipo.addEventListener('change', desenhar);
+filtroStatus.addEventListener('change', desenhar);
+</script>
+
+</body>
+</html>

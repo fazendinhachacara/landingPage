@@ -1,0 +1,70 @@
+rules_version = '2';
+
+// Regras de segurança dos pedidos de oração e visita.
+//
+// IMPORTANTE: é este arquivo que protege os pedidos, não as chaves do firebase-config.js
+// (que são públicas por natureza num site estático). Cole o conteúdo abaixo em
+// Firebase > Firestore Database > Regras e clique em "Publicar".
+//
+// A ideia em uma frase: QUALQUER PESSOA PODE ENVIAR um pedido, mas SÓ QUEM ESTÁ LOGADO PODE LER.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /pedidos/{pedido} {
+
+      // Só a liderança logada lê os pedidos. Sem isso, os dados ficariam abertos na internet.
+      allow read: if request.auth != null;
+
+      // Qualquer visitante do site pode criar um pedido, desde que ele tenha exatamente
+      // o formato esperado. As validações evitam que alguém use a coleção para gravar lixo.
+      allow create: if
+        request.resource.data.keys().hasOnly([
+          'tipo', 'anonimo', 'nome', 'telefone', 'texto',
+          'autorizaCompartilhar', 'endereco', 'horario', 'status', 'criadoEm'
+        ])
+        && request.resource.data.keys().hasAll([
+          'tipo', 'anonimo', 'nome', 'telefone', 'texto',
+          'autorizaCompartilhar', 'endereco', 'horario', 'status', 'criadoEm'
+        ])
+        && request.resource.data.tipo in ['oracao', 'visita']
+        && request.resource.data.anonimo is bool
+        && request.resource.data.autorizaCompartilhar is bool
+        && request.resource.data.nome is string
+        && request.resource.data.nome.size() <= 80
+        && request.resource.data.telefone is string
+        && request.resource.data.telefone.size() <= 20
+        && request.resource.data.texto is string
+        && request.resource.data.texto.size() <= 2000
+        && request.resource.data.endereco is string
+        && request.resource.data.endereco.size() <= 160
+        && request.resource.data.horario is string
+        && request.resource.data.horario.size() <= 80
+        // O pedido sempre nasce pendente: ninguém de fora cria algo já marcado como atendido.
+        && request.resource.data.status == 'pendente'
+        // Obriga o uso de serverTimestamp(), para a data não poder ser forjada.
+        && request.resource.data.criadoEm == request.time
+        // Pedido de visita precisa de nome, telefone e endereço; o de oração precisa do texto.
+        && (request.resource.data.tipo == 'oracao'
+              ? request.resource.data.texto.size() >= 5
+              : request.resource.data.nome.size() >= 2
+                && request.resource.data.telefone.size() >= 8
+                && request.resource.data.endereco.size() >= 5
+                && request.resource.data.anonimo == false);
+
+      // A liderança logada só mexe no acompanhamento. O que a pessoa escreveu é intocável.
+      allow update: if request.auth != null
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['status', 'observacao', 'atendidoPor', 'atendidoEm'])
+        && request.resource.data.status in ['pendente', 'atendido'];
+
+      // Ninguém apaga pedido pelo site. Se precisar remover algum, é pelo console do Firebase.
+      allow delete: if false;
+    }
+
+    // Qualquer outra coleção fica fechada.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

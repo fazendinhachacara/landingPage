@@ -21,6 +21,28 @@ a{color:#3F4348}a:hover{color:#1F2124}
 .botoes a{justify-content:center}
 @media (max-width: 600px){.botoes{flex-direction:column;align-items:stretch;width:100%}.botoes a{width:100%;box-sizing:border-box}}
 </style>
+<style>
+/* Formulários de pedido de oração e visita */
+.campo{display:flex;flex-direction:column;gap:6px;font-size:15px;font-weight:600;color:#24272B}
+.campo input,.campo textarea{width:100%;box-sizing:border-box;min-height:48px;padding:12px 14px;border:1px solid #CFC4B2;border-radius:12px;background:#FFFFFF;font:inherit;font-weight:400;color:#24272B;resize:vertical}
+.campo input:focus-visible,.campo textarea:focus-visible{outline:3px solid #2F68B0;outline-offset:2px;border-color:#2F68B0}
+.campo input[aria-invalid="true"],.campo textarea[aria-invalid="true"]{border-color:#B03A3A}
+.opcao{display:flex;align-items:flex-start;gap:10px;font-size:15px;line-height:1.45;color:#3A3D42;cursor:pointer}
+.opcao input{flex:0 0 auto;width:20px;height:20px;margin:1px 0 0;accent-color:#3F4348}
+.aviso{margin:0;font-size:14px;color:#5A5E63}
+.btn-enviar{min-height:48px;padding:0 24px;border:0;border-radius:999px;background:#3F4348;color:#FFFFFF;font:inherit;font-weight:600;cursor:pointer}
+.btn-enviar:hover{background:#2A2D31}
+.btn-enviar:disabled{opacity:.6;cursor:default}
+.btn-enviar:focus-visible{outline:3px solid #2F68B0;outline-offset:3px}
+.status{margin:0;font-size:15px;min-height:1px}
+.status[data-tipo="erro"]{color:#9B2C2C;font-weight:600}
+.status[data-tipo="ok"]{color:#2A6B3F;font-weight:600}
+/* O hidden precisa vencer o display:flex que está no próprio elemento. */
+[hidden]{display:none !important}
+/* Campo-armadilha: invisível para pessoas, serve para descartar envio automático de robô. */
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.enviado{background:#F5F0E8;border:1px solid #E2D9CB;border-radius:20px;padding:28px 24px;display:flex;flex-direction:column;gap:12px}
+</style>
 </head>
 <body>
 <div style="font-family: 'Figtree', 'Segoe UI', system-ui, sans-serif; color: #24272B; background: #F5F0E8; font-size: 17px; line-height: 1.6">
@@ -36,6 +58,7 @@ a{color:#3F4348}a:hover{color:#1F2124}
 </div>
 <nav aria-label="Seções" style="display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 15px; font-weight: 500">
 <a href="#cultos" style="color: #24272B; text-decoration: none; padding: 10px 0">Cultos</a>
+<a href="#pedidos" style="color: #24272B; text-decoration: none; padding: 10px 0">Pedidos</a>
 <!-- <a href="#historia" style="color: #24272B; text-decoration: none; padding: 10px 0">Nossa história</a> -->
 <a href="#pastores" style="color: #24272B; text-decoration: none; padding: 10px 0">Pastores</a>
 <a href="#grupos" style="color: #24272B; text-decoration: none; padding: 10px 0">Grupos</a>
@@ -70,6 +93,65 @@ a{color:#3F4348}a:hover{color:#1F2124}
 </div>
 <div id="cultos-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px">
 
+</div>
+</section>
+
+<section id="pedidos" style="background: #FFFFFF; border-top: 1px solid #E2D9CB; border-bottom: 1px solid #E2D9CB">
+<div style="max-width: 1120px; margin: 0 auto; padding: 80px 24px; display: flex; flex-direction: column; gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-size: 14px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #5A5E63">Estamos aqui por você</span>
+<h2 style="margin: 0; font-family: 'Bricolage Grotesque', Georgia, serif; font-size: clamp(30px, 4vw, 44px); line-height: 1.15">Pedidos de oração e visita</h2>
+<p style="margin: 0; max-width: 620px; color: #3A3D42">Seu pedido chega direto para a liderança da igreja. Só os pastores e o grupo de oração têm acesso — nada aparece no site.</p>
+</div>
+
+<div class="pedidos-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; align-items: start">
+
+<form id="form-oracao" novalidate style="background: #F5F0E8; border: 1px solid #E2D9CB; border-radius: 20px; padding: 28px 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<strong style="font-family: 'Bricolage Grotesque', Georgia, serif; font-size: 24px">Pedido de oração</strong>
+<span style="font-size: 15px; color: #5A5E63">Vamos orar com você.</span>
+</div>
+
+<label class="opcao"><input type="checkbox" name="anonimo" id="oracao-anonimo"><span>Prefiro não me identificar</span></label>
+
+<div id="oracao-identificacao" style="display: flex; flex-direction: column; gap: 16px">
+<label class="campo"><span>Nome</span><input type="text" name="nome" maxlength="80" autocomplete="name"></label>
+<label class="campo"><span>Telefone (WhatsApp)</span><input type="tel" name="telefone" maxlength="20" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000"></label>
+</div>
+
+<label class="campo"><span>Seu pedido</span><textarea name="texto" rows="5" maxlength="2000" required placeholder="Escreva com as suas palavras. Pode ser por você ou por outra pessoa."></textarea></label>
+
+<label class="opcao"><input type="checkbox" name="autorizaCompartilhar"><span>Autorizo compartilhar meu pedido com o grupo de oração da igreja</span></label>
+
+<p class="aviso">Sem essa autorização, só os pastores leem o seu pedido.</p>
+
+<input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+<button type="submit" class="btn-enviar">Enviar pedido de oração</button>
+<p class="status" role="status" aria-live="polite"></p>
+</form>
+
+<form id="form-visita" novalidate style="background: #F5F0E8; border: 1px solid #E2D9CB; border-radius: 20px; padding: 28px 24px; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<strong style="font-family: 'Bricolage Grotesque', Georgia, serif; font-size: 24px">Pedido de visita</strong>
+<span style="font-size: 15px; color: #5A5E63">Queremos ir até você.</span>
+</div>
+
+<label class="campo"><span>Nome</span><input type="text" name="nome" maxlength="80" required autocomplete="name"></label>
+<label class="campo"><span>Telefone (WhatsApp)</span><input type="tel" name="telefone" maxlength="20" inputmode="tel" required autocomplete="tel" placeholder="(11) 90000-0000"></label>
+<label class="campo"><span>Endereço</span><input type="text" name="endereco" maxlength="160" required autocomplete="street-address" placeholder="Rua, número, bairro"></label>
+<label class="campo"><span>Melhor dia e horário</span><input type="text" name="horario" maxlength="80" placeholder="Ex.: sábado à tarde"></label>
+<label class="campo"><span>Quer contar alguma coisa? (opcional)</span><textarea name="texto" rows="3" maxlength="2000" placeholder="O motivo da visita, se quiser dizer."></textarea></label>
+
+<p class="aviso">Para a visita acontecer, precisamos do endereço e de um contato — por isso este pedido não pode ser anônimo.</p>
+
+<input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+<button type="submit" class="btn-enviar">Enviar pedido de visita</button>
+<p class="status" role="status" aria-live="polite"></p>
+</form>
+
+</div>
 </div>
 </section>
 
@@ -264,5 +346,123 @@ a{color:#3F4348}a:hover{color:#1F2124}
   setInterval(atualizar, 60000);
 })();
 </script>
+
+<script type="module">
+import { firebaseConfig } from './firebase-config.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const db = getFirestore(initializeApp(firebaseConfig));
+
+const anonimo = document.getElementById('oracao-anonimo');
+const identificacao = document.getElementById('oracao-identificacao');
+anonimo.addEventListener('change', () => {
+  identificacao.hidden = anonimo.checked;
+  if (anonimo.checked) identificacao.querySelectorAll('input').forEach(i => { i.value = ''; });
+});
+
+function limpa(valor, limite) {
+  return String(valor || '').trim().slice(0, limite);
+}
+
+function marcaErro(form, nome, mensagem) {
+  const campo = form.elements[nome];
+  campo.setAttribute('aria-invalid', 'true');
+  campo.focus();
+  avisa(form, mensagem, 'erro');
+}
+
+function avisa(form, mensagem, tipo) {
+  const status = form.querySelector('.status');
+  status.textContent = mensagem;
+  status.dataset.tipo = tipo;
+}
+
+function sucesso(form, titulo, texto) {
+  const bloco = document.createElement('div');
+  bloco.className = 'enviado';
+  bloco.setAttribute('role', 'status');
+  const h = document.createElement('strong');
+  h.style.cssText = "font-family: 'Bricolage Grotesque', Georgia, serif; font-size: 24px";
+  h.textContent = titulo;
+  const p = document.createElement('p');
+  p.style.cssText = 'margin: 0; color: #3A3D42';
+  p.textContent = texto;
+  bloco.append(h, p);
+  form.replaceWith(bloco);
+}
+
+function envio(form, monta, titulo, texto) {
+  form.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    form.querySelectorAll('[aria-invalid]').forEach(c => c.removeAttribute('aria-invalid'));
+    avisa(form, '', '');
+
+    // Se o campo-armadilha veio preenchido, foi robô: fingimos sucesso e não gravamos nada.
+    if (form.elements.website.value) { sucesso(form, titulo, texto); return; }
+
+    const dados = monta(form);
+    if (!dados) return;
+
+    const botao = form.querySelector('.btn-enviar');
+    botao.disabled = true;
+    avisa(form, 'Enviando...', '');
+    try {
+      await addDoc(collection(db, 'pedidos'), { ...dados, status: 'pendente', criadoEm: serverTimestamp() });
+      sucesso(form, titulo, texto);
+    } catch (e) {
+      botao.disabled = false;
+      avisa(form, 'Não conseguimos enviar agora. Tente de novo em alguns minutos ou fale com a gente pelo Instagram.', 'erro');
+      console.error(e);
+    }
+  });
+}
+
+envio(
+  document.getElementById('form-oracao'),
+  (form) => {
+    const texto = limpa(form.elements.texto.value, 2000);
+    if (texto.length < 5) { marcaErro(form, 'texto', 'Escreva o seu pedido para podermos orar.'); return null; }
+    const semNome = form.elements.anonimo.checked;
+    return {
+      tipo: 'oracao',
+      anonimo: semNome,
+      nome: semNome ? '' : limpa(form.elements.nome.value, 80),
+      telefone: semNome ? '' : limpa(form.elements.telefone.value, 20),
+      texto,
+      autorizaCompartilhar: form.elements.autorizaCompartilhar.checked,
+      endereco: '',
+      horario: ''
+    };
+  },
+  'Recebemos o seu pedido.',
+  'Vamos orar por você. Se quiser conversar, fale com a gente pelo Instagram ou procure a liderança no próximo culto.'
+);
+
+envio(
+  document.getElementById('form-visita'),
+  (form) => {
+    const nome = limpa(form.elements.nome.value, 80);
+    if (nome.length < 2) { marcaErro(form, 'nome', 'Diga o seu nome para sabermos quem procurar.'); return null; }
+    const telefone = limpa(form.elements.telefone.value, 20);
+    if (telefone.replace(/\D/g, '').length < 10) { marcaErro(form, 'telefone', 'Informe um telefone com DDD para conseguirmos combinar a visita.'); return null; }
+    const endereco = limpa(form.elements.endereco.value, 160);
+    if (endereco.length < 5) { marcaErro(form, 'endereco', 'Informe o endereço para sabermos onde ir.'); return null; }
+    return {
+      tipo: 'visita',
+      anonimo: false,
+      nome,
+      telefone,
+      texto: limpa(form.elements.texto.value, 2000),
+      autorizaCompartilhar: false,
+      endereco,
+      horario: limpa(form.elements.horario.value, 80)
+    };
+  },
+  'Pedido de visita recebido.',
+  'A liderança vai entrar em contato pelo telefone que você informou para combinar o melhor dia.'
+);
+</script>
+
 </body>
 </html>
