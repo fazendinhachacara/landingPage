@@ -5,10 +5,10 @@
 // Estes valores são públicos por natureza num site estático, e isso é esperado: quem protege
 // os pedidos são as regras de segurança do Firestore (arquivo firestore.rules), não estas chaves.
 export const firebaseConfig = {
-  apiKey: 'COLE_AQUI',
-  authDomain: 'COLE_AQUI',
-  projectId: 'COLE_AQUI',
-  storageBucket: 'COLE_AQUI',
-  messagingSenderId: 'COLE_AQUI',
-  appId: 'COLE_AQUI'
+  apiKey: 'AIzaSyC1TQ5yc-vZ2dXEZJXC9RutSQnnr4iDrP0',
+  authDomain: 'pedidosoracaovisita.firebaseapp.com',
+  projectId: 'pedidosoracaovisita',
+  storageBucket: 'pedidosoracaovisita.firebasestorage.app',
+  messagingSenderId: '405125561380',
+  appId: '1:405125561380:web:2884a334cf57cef66aecb1'
 };
