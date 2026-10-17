@@ -116,7 +116,6 @@ a{color:#3F4348}a:hover{color:#1F2124}
 
 <div id="oracao-identificacao" style="display: flex; flex-direction: column; gap: 16px">
 <label class="campo"><span>Nome</span><input type="text" name="nome" maxlength="80" autocomplete="name"></label>
-<label class="campo"><span>Telefone (WhatsApp)</span><input type="tel" name="telefone" maxlength="20" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000"></label>
 </div>
 
 <label class="campo"><span>Seu pedido</span><textarea name="texto" rows="5" maxlength="2000" required placeholder="Escreva com as suas palavras. Pode ser por você ou por outra pessoa."></textarea></label>
@@ -428,7 +427,7 @@ envio(
       tipo: 'oracao',
       anonimo: semNome,
       nome: semNome ? '' : limpa(form.elements.nome.value, 80),
-      telefone: semNome ? '' : limpa(form.elements.telefone.value, 20),
+      telefone: '',
       texto,
       autorizaCompartilhar: form.elements.autorizaCompartilhar.checked,
       endereco: '',
