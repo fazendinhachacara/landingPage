@@ -43,6 +43,72 @@ a{color:#3F4348}a:hover{color:#1F2124}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 .enviado{background:#F5F0E8;border:1px solid #E2D9CB;border-radius:20px;padding:28px 24px;display:flex;flex-direction:column;gap:12px}
 </style>
+<style>
+/* Grupos: cartões que abrem um painel com líderes e carrossel de fotos */
+/* O dense faz os cartões seguintes ocuparem a linha do cartão aberto, e o painel cai logo abaixo dela. */
+.grupos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px;grid-auto-flow:dense}
+.grupo-card{appearance:none;margin:0;padding:0;text-align:left;font:inherit;color:inherit;border:1px solid #E2D9CB;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;background:#FFFFFF;cursor:pointer;transition:box-shadow .2s,border-color .2s}
+.grupo-card:hover{border-color:#B9AD99}
+.grupo-card:focus-visible{outline:3px solid #2F68B0;outline-offset:3px}
+.grupo-card[aria-expanded="true"]{border-color:#3F4348;box-shadow:0 0 0 2px #3F4348}
+.grupo-card .faixa{display:block;height:88px}
+.grupo-card .info{padding:12px 20px 20px;display:flex;flex-direction:column;gap:6px;flex:1}
+.grupo-card .ver{margin-top:auto;padding-top:10px;display:inline-flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:#24272B}
+.grupo-card .ver svg{transition:transform .2s}
+.grupo-card[aria-expanded="true"] .ver svg{transform:rotate(180deg)}
+.logo-ebd{display:flex;align-items:center;justify-content:center;color:#2E6B57}
+.painel-topo .logo .logo-ebd{width:100%;height:100%}
+.painel-topo .logo .logo-ebd svg{width:30px;height:30px}
+
+.grupo-painel{grid-column:1/-1;background:#F5F0E8;border:1px solid #E2D9CB;border-radius:20px;padding:24px;display:grid;grid-template-columns:minmax(240px,300px) minmax(0,1fr);gap:24px;align-items:start}
+.painel-lado{display:flex;flex-direction:column;gap:16px}
+.painel-topo{display:flex;align-items:center;gap:14px}
+.painel-topo .logo{flex:0 0 auto;width:64px;height:64px;border-radius:50%;border:3px solid #FFFFFF;box-shadow:0 2px 8px rgba(36,39,43,.15);overflow:hidden;box-sizing:border-box}
+.painel-topo .logo img{width:100%;height:100%;display:block}
+.painel-topo .nome{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.painel-topo strong{font-family:'Bricolage Grotesque',Georgia,serif;font-size:22px}
+.painel-topo .nome span{font-size:15px;color:#5A5E63}
+.fechar{flex:0 0 auto;width:44px;height:44px;border-radius:50%;border:1.5px solid #24272B;background:transparent;color:#24272B;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.fechar:hover{background:rgba(0,0,0,.05)}
+.fechar:focus-visible{outline:3px solid #2F68B0;outline-offset:3px}
+.lideres{background:#FFFFFF;border:1px solid #E2D9CB;border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.lideres .foto{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#E7DCCB}
+.lideres .sem-foto{width:100%;aspect-ratio:4/3;background:#E7DCCB;color:#5A5E63;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:14px;text-align:center;padding:12px;box-sizing:border-box}
+.lideres .quem{padding:12px 16px 14px;display:flex;flex-direction:column;line-height:1.3}
+.lideres .rotulo{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#5A5E63}
+.lideres .nomes{font-weight:600}
+
+.carrossel{position:relative;min-width:0}
+.trilho{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;border-radius:16px;scrollbar-width:none;overscroll-behavior-x:contain;background:#24272B}
+.trilho::-webkit-scrollbar{display:none}
+.trilho:focus-visible{outline:3px solid #2F68B0;outline-offset:3px}
+.slide{flex:0 0 100%;scroll-snap-align:center;position:relative;aspect-ratio:4/3;overflow:hidden;margin:0}
+/* Fundo desfocado com a própria foto, para fotos em pé ou deitadas preencherem o quadro sem cortar ninguém. */
+.slide .fundo{position:absolute;inset:-24px;background-size:cover;background-position:center;filter:blur(22px) brightness(.55)}
+.slide img{position:relative;width:100%;height:100%;object-fit:contain;display:block}
+.seta{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#24272B;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.seta:disabled{opacity:0;pointer-events:none}
+.seta:focus-visible{outline:3px solid #2F68B0;outline-offset:2px}
+.seta.ant{left:12px}.seta.prox{right:12px}
+.carrossel-rodape{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px}
+.pontos{display:flex;flex-wrap:wrap;gap:2px}
+.pontos button{width:28px;height:28px;padding:0;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.pontos button::before{content:'';width:10px;height:10px;border-radius:50%;background:#CFC4B2;transition:background .2s,transform .2s}
+.pontos button[aria-current="true"]::before{background:#3F4348;transform:scale(1.2)}
+.pontos button:focus-visible{outline:3px solid #2F68B0;outline-offset:0;border-radius:50%}
+.contador{font-size:14px;color:#5A5E63;font-variant-numeric:tabular-nums}
+.sem-fotos{border-radius:16px;aspect-ratio:4/3;background:#FFFFFF;border:1px dashed #CFC4B2;color:#5A5E63;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;box-sizing:border-box}
+
+@media (max-width: 760px){
+  .grupo-painel{grid-template-columns:1fr;padding:16px;gap:16px}
+  .lideres{flex-direction:row;align-items:center}
+  .lideres .foto,.lideres .sem-foto{width:96px;height:96px;aspect-ratio:auto;flex:0 0 auto}
+  .lideres .sem-foto span{display:none}
+  .seta{width:40px;height:40px}
+  .seta.ant{left:8px}.seta.prox{right:8px}
+}
+@media (prefers-reduced-motion: reduce){.trilho{scroll-behavior:auto}}
+</style>
 </head>
 <body>
 <div style="font-family: 'Figtree', 'Segoe UI', system-ui, sans-serif; color: #24272B; background: #F5F0E8; font-size: 17px; line-height: 1.6">
@@ -199,28 +265,7 @@ a{color:#3F4348}a:hover{color:#1F2124}
 <span style="font-size: 14px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #5A5E63">Tem lugar para você</span>
 <h2 style="margin: 0; font-family: 'Bricolage Grotesque', Georgia, serif; font-size: clamp(30px, 4vw, 44px); line-height: 1.15">Nossos grupos</h2>
 </div>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px">
-<div style="border: 1px solid #E2D9CB; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; background: #FFFFFF">
-<div style="height: 88px; background: #E07FA6"></div>
-<img src="img/vozes-de-siao.png" alt="Logo Vozes de Sião" style="width: 96px; height: 96px; margin: -48px 0 0 20px; border-radius: 50%; border: 4px solid #FFFFFF; object-fit: cover; background: #FFFFFF; display: block">
-<div style="padding: 12px 20px 20px; display: flex; flex-direction: column; gap: 6px"><strong style="font-size: 19px">Vozes de Sião</strong><span style="color: #5A5E63; font-size: 15px">Irmãs · Círculo de Oração</span><span style="font-size: 15px; color: #3A3D42"><strong style="color: #24272B">Culto:</strong> toda segunda-feira, 19h30</span><span style="font-size: 15px; color: #3A3D42"><strong style="color: #24272B">Ensaio:</strong> 1º e 3º domingo do mês, 17h</span></div>
-</div>
-<div style="border: 1px solid #E2D9CB; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; background: #FFFFFF">
-<div style="height: 88px; background: #1C1D1F"></div>
-<img src="img/valentes-de-davi.png" alt="Logo Valentes de Davi" style="width: 96px; height: 96px; margin: -48px 0 0 20px; border-radius: 50%; border: 4px solid #FFFFFF; object-fit: contain; padding: 6px; box-sizing: border-box; background: #FFFFFF; display: block">
-<div style="padding: 12px 20px 20px; display: flex; flex-direction: column; gap: 6px"><strong style="font-size: 19px">Valentes de Davi</strong><span style="color: #5A5E63; font-size: 15px">Varões</span><span style="font-size: 15px; color: #3A3D42"><strong style="color: #24272B">Culto:</strong> todo 4º domingo do mês, 18h30</span><span style="font-size: 15px; color: #3A3D42"><strong style="color: #24272B">Ensaio:</strong> sábados, 19h (sob aviso prévio)</span></div>
-</div>
-<div style="border: 1px solid #E2D9CB; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; background: #FFFFFF">
-<div style="height: 88px; background: #2F68B0"></div>
-<img src="img/selo-da-promessa.png" alt="Logo Selo da Promessa" style="width: 96px; height: 96px; margin: -48px 0 0 20px; border-radius: 50%; border: 4px solid #FFFFFF; object-fit: cover; background: #000000; display: block">
-<div style="padding: 12px 20px 20px; display: flex; flex-direction: column; gap: 6px"><strong style="font-size: 19px">Selo da Promessa</strong><span style="color: #5A5E63; font-size: 15px">Jovens</span><span style="font-size: 15px; color: #3A3D42"><strong style="color: #24272B">Culto:</strong> todo 3º domingo do mês, 18h30</span><span style="font-size: 15px; color: #3A3D42"><strong style="color: #24272B">Ensaio:</strong> domingos, 11h</span></div>
-</div>
-<div style="border: 1px solid #E2D9CB; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; background: #FFFFFF">
-<div style="height: 88px; background: linear-gradient(120deg, #F5C842, #EE86B0)"></div>
-<img src="img/cordeirinhos-de-jesus.png" alt="Logo Cordeirinhos de Jesus" style="width: 96px; height: 96px; margin: -48px 0 0 20px; border-radius: 50%; border: 4px solid #FFFFFF; object-fit: contain; padding: 8px; box-sizing: border-box; background: #FFFFFF; display: block">
-<div style="padding: 12px 20px 20px; display: flex; flex-direction: column; gap: 6px"><strong style="font-size: 19px">Cordeirinhos de Jesus</strong><span style="color: #5A5E63; font-size: 15px">Crianças</span><span style="font-size: 15px; color: #3A3D42"><strong style="color: #24272B">Culto:</strong> 5º domingo do mês, 18h30</span><span style="font-size: 15px; color: #3A3D42"><strong style="color: #24272B">Ensaio:</strong> domingos, 10h30</span></div>
-</div>
-</div>
+<div class="grupos-grid" id="grupos-grid"></div>
 </div>
 </section>
 
@@ -273,6 +318,7 @@ a{color:#3F4348}a:hover{color:#1F2124}
     { id: 'qua', dia: 'Quarta-feira', hora: '19h30', h: 19, m: 30, nome: 'Louvor e Palavra', sub: '', quando: function (d) { return d.getDay() === 3; } },
     { id: 'sex', dia: 'Sexta-feira', hora: '19h30', h: 19, m: 30, nome: 'Culto de Ensino', sub: '', quando: function (d) { return d.getDay() === 5; } },
     { id: 'sab', dia: '2º sábado do mês', hora: '18h30', h: 18, m: 30, nome: 'Santa Ceia', sub: '', quando: function (d) { return d.getDay() === 6 && d.getDate() >= 8 && d.getDate() <= 14; } },
+    { id: 'ebd', dia: 'Domingo', hora: '9h', h: 9, m: 0, nome: 'Escola Bíblica Dominical', sub: 'Classes para todas as idades', quando: function (d) { return d.getDay() === 0; } },
     { id: 'dom', dia: 'Domingo', hora: '18h30', h: 18, m: 30, nome: '', sub: '', quando: function (d) { return d.getDay() === 0; } }
   ];
   // Culto de domingo conforme a semana do mês (3º, 4º e 5º domingo)
@@ -291,7 +337,7 @@ a{color:#3F4348}a:hover{color:#1F2124}
 
   function atualizar() {
     var agora = new Date();
-    var dom = CULTOS[4];
+    var dom = CULTOS.filter(function (c) { return c.id === 'dom'; })[0];
     for (var k = 0; k < 8; k++) {
       var dk = dia(agora, k);
       if (dk.getDay() === 0 && inicio(dk, dom).getTime() + DURACAO_MS > agora.getTime()) {
@@ -343,6 +389,190 @@ a{color:#3F4348}a:hover{color:#1F2124}
   }
   atualizar();
   setInterval(atualizar, 60000);
+})();
+</script>
+
+<script>
+(function () {
+  // ===== Grupos (edite aqui) =====
+  // lideres.foto: caminho da foto dos líderes; vazio mostra um espaço reservado.
+  // fotos: aparecem no carrossel, na ordem da lista.
+  var GRUPOS = [
+    {
+      id: 'vozes', nome: 'Vozes de Sião', sub: 'Irmãs · Círculo de Oração', cor: '#E07FA6',
+      logo: 'img/vozes-de-siao.png', logoEstilo: 'object-fit: cover; background: #FFFFFF',
+      horarios: [['Culto', 'toda segunda-feira, 19h30'], ['Ensaio', '1º e 3º domingo do mês, 17h']],
+      lideres: { foto: '', nomes: '' },
+      fotos: [{ src: 'img/grupos/vozes-1.jpg', alt: 'Integrantes reunidos no templo, de preto com lenço vermelho' }]
+    },
+    {
+      id: 'valentes', nome: 'Valentes de Davi', sub: 'Varões', cor: '#1C1D1F',
+      logo: 'img/valentes-de-davi.png', logoEstilo: 'object-fit: contain; padding: 6px; box-sizing: border-box; background: #FFFFFF',
+      horarios: [['Culto', 'todo 4º domingo do mês, 18h30'], ['Ensaio', 'sábados, 19h (sob aviso prévio)']],
+      lideres: { foto: '', nomes: '' },
+      fotos: [{ src: 'img/grupos/valentes-1.jpg', alt: 'Integrantes no altar segurando caixas com os seus nomes' }]
+    },
+    {
+      id: 'selo', nome: 'Selo da Promessa', sub: 'Jovens', cor: '#2F68B0',
+      logo: 'img/selo-da-promessa.png', logoEstilo: 'object-fit: cover; background: #000000',
+      horarios: [['Culto', 'todo 3º domingo do mês, 18h30'], ['Ensaio', 'domingos, 11h']],
+      lideres: { foto: '', nomes: '' },
+      fotos: []
+    },
+    {
+      id: 'cordeirinhos', nome: 'Cordeirinhos de Jesus', sub: 'Crianças', cor: 'linear-gradient(120deg, #F5C842, #EE86B0)',
+      logo: 'img/cordeirinhos-de-jesus.png', logoEstilo: 'object-fit: contain; padding: 8px; box-sizing: border-box; background: #FFFFFF',
+      horarios: [['Culto', '5º domingo do mês, 18h30'], ['Ensaio', 'domingos, 10h30']],
+      lideres: { foto: '', nomes: '' },
+      fotos: [
+        { src: 'img/grupos/cordeirinhos-1.jpg', alt: 'Crianças com a professora na festa do Dia das Crianças' },
+        { src: 'img/grupos/cordeirinhos-2.jpg', alt: 'Crianças com a Bíblia aberta durante a aula' }
+      ]
+    },
+    {
+      id: 'ebd', nome: 'Escola Bíblica Dominical', sub: 'EBD · Todas as idades', cor: '#2E6B57',
+      logo: '', logoEstilo: '',
+      horarios: [['Aula', 'todo domingo, 9h']],
+      lideres: { foto: '', nomes: '' },
+      fotos: [
+        { src: 'img/grupos/ebd-1.jpg', alt: 'Professor ensinando a classe de adultos' },
+        { src: 'img/grupos/ebd-2.jpg', alt: 'Classe em oração ao final da aula' },
+        { src: 'img/grupos/ebd-3.jpg', alt: 'Alunos de todas as idades segurando os certificados de conclusão' },
+        { src: 'img/grupos/ebd-4.jpg', alt: 'Classe de jovens com a revista da Escola Dominical' }
+      ]
+    }
+  ];
+
+  var SETA = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>';
+  var LIVRO = '<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z"></path><path d="M22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"></path></svg>';
+  var PESSOAS = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"></circle><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"></path><circle cx="17" cy="9" r="2.6"></circle><path d="M16 14.2c2.8.4 5 2.8 5 5.8"></path></svg>';
+
+  var grade = document.getElementById('grupos-grid');
+  var painel = document.createElement('div');
+  painel.className = 'grupo-painel';
+  painel.id = 'grupo-painel';
+  painel.setAttribute('role', 'region');
+  painel.hidden = true;
+  var aberto = null;
+
+  function esc(t) { var e = document.createElement('span'); e.textContent = t; return e.innerHTML; }
+
+  function logo(g, estiloExtra) {
+    if (!g.logo) return '<span class="logo-ebd" style="background: #FFFFFF; ' + estiloExtra + '; display: flex">' + LIVRO + '</span>';
+    return '<img src="' + esc(g.logo) + '" alt="" style="' + g.logoEstilo + '; ' + estiloExtra + '">';
+  }
+
+  GRUPOS.forEach(function (g) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'grupo-card';
+    b.setAttribute('aria-expanded', 'false');
+    b.setAttribute('aria-controls', 'grupo-painel');
+    b.dataset.id = g.id;
+    b.innerHTML =
+      '<span class="faixa" style="background: ' + g.cor + '"></span>' +
+      logo(g, 'width: 96px; height: 96px; margin: -48px 0 0 20px; border-radius: 50%; border: 4px solid #FFFFFF; display: block; box-sizing: border-box') +
+      '<span class="info"><strong style="font-size: 19px">' + esc(g.nome) + '</strong>' +
+      '<span style="color: #5A5E63; font-size: 15px">' + esc(g.sub) + '</span>' +
+      g.horarios.map(function (h) { return '<span style="font-size: 15px; color: #3A3D42"><strong style="color: #24272B">' + esc(h[0]) + ':</strong> ' + esc(h[1]) + '</span>'; }).join('') +
+      '<span class="ver"><span class="ver-texto">Ver fotos e líderes</span>' + SETA + '</span></span>';
+    b.addEventListener('click', function () { aberto === g.id ? fechar() : abrir(g, b); });
+    grade.append(b);
+  });
+
+  function htmlLideres(l) {
+    var foto = l.foto
+      ? '<img class="foto" src="' + esc(l.foto) + '" alt="Líderes do grupo: ' + esc(l.nomes) + '">'
+      : '<div class="sem-foto">' + PESSOAS + '<span>Foto dos líderes em breve</span></div>';
+    return '<div class="lideres">' + foto + '<div class="quem"><span class="rotulo">Líderes</span><span class="nomes">' + esc(l.nomes || 'A definir') + '</span></div></div>';
+  }
+
+  function htmlCarrossel(g) {
+    if (!g.fotos.length) return '<div class="sem-fotos">As fotos deste grupo chegam em breve.</div>';
+    var varias = g.fotos.length > 1;
+    return '<div class="carrossel" role="group" aria-roledescription="carrossel" aria-label="Fotos do grupo ' + esc(g.nome) + '">' +
+      '<div class="trilho" tabindex="0">' +
+      g.fotos.map(function (f, i) {
+        return '<figure class="slide" aria-label="Foto ' + (i + 1) + ' de ' + g.fotos.length + '">' +
+          '<div class="fundo" style="background-image: url(\'' + esc(f.src) + '\')"></div>' +
+          '<img src="' + esc(f.src) + '" alt="' + esc(f.alt) + '"' + (i ? ' loading="lazy"' : '') + ' decoding="async"></figure>';
+      }).join('') + '</div>' +
+      (varias
+        ? '<button type="button" class="seta ant" aria-label="Foto anterior"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg></button>' +
+          '<button type="button" class="seta prox" aria-label="Próxima foto"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>' +
+          '<div class="carrossel-rodape"><div class="pontos">' +
+          g.fotos.map(function (_f, i) { return '<button type="button" aria-label="Ver foto ' + (i + 1) + '"></button>'; }).join('') +
+          '</div><span class="contador"></span></div>'
+        : '') +
+      '</div>';
+  }
+
+  function ligarCarrossel() {
+    var trilho = painel.querySelector('.trilho');
+    if (!trilho) return;
+    var pontos = painel.querySelectorAll('.pontos button');
+    var ant = painel.querySelector('.seta.ant');
+    var prox = painel.querySelector('.seta.prox');
+    var contador = painel.querySelector('.contador');
+    var total = trilho.children.length;
+    function atual() { return Math.round(trilho.scrollLeft / (trilho.clientWidth || 1)); }
+    function ir(i) { trilho.scrollTo({ left: Math.max(0, Math.min(total - 1, i)) * trilho.clientWidth }); }
+    function marcar() {
+      var i = atual();
+      for (var k = 0; k < pontos.length; k++) pontos[k].setAttribute('aria-current', k === i ? 'true' : 'false');
+      if (ant) ant.disabled = i === 0;
+      if (prox) prox.disabled = i === total - 1;
+      if (contador) contador.textContent = (i + 1) + ' / ' + total;
+    }
+    for (var k = 0; k < pontos.length; k++) (function (n) { pontos[n].addEventListener('click', function () { ir(n); }); })(k);
+    if (ant) ant.addEventListener('click', function () { ir(atual() - 1); });
+    if (prox) prox.addEventListener('click', function () { ir(atual() + 1); });
+    trilho.addEventListener('scroll', marcar, { passive: true });
+    trilho.addEventListener('keydown', function (ev) {
+      if (ev.key === 'ArrowRight') { ev.preventDefault(); ir(atual() + 1); }
+      if (ev.key === 'ArrowLeft') { ev.preventDefault(); ir(atual() - 1); }
+    });
+    marcar();
+  }
+
+  function abrir(g, cartao) {
+    if (aberto) marcarCartao(aberto, false);
+    aberto = g.id;
+    marcarCartao(g.id, true);
+    painel.setAttribute('aria-label', g.nome);
+    painel.innerHTML =
+      '<div class="painel-lado">' +
+      '<div class="painel-topo"><span class="logo">' + logo(g, '') + '</span>' +
+      '<span class="nome"><strong>' + esc(g.nome) + '</strong><span>' + esc(g.sub) + '</span></span>' +
+      '<button type="button" class="fechar" aria-label="Fechar ' + esc(g.nome) + '"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>' +
+      htmlLideres(g.lideres) +
+      '</div>' + htmlCarrossel(g);
+    // O painel entra logo depois do cartão clicado; no celular ele aparece colado ao cartão.
+    cartao.after(painel);
+    painel.hidden = false;
+    painel.querySelector('.fechar').addEventListener('click', function () { fechar(true); });
+    ligarCarrossel();
+    painel.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
+  }
+
+  function marcarCartao(id, ligado) {
+    var c = grade.querySelector('.grupo-card[data-id="' + id + '"]');
+    if (!c) return;
+    c.setAttribute('aria-expanded', ligado ? 'true' : 'false');
+    c.querySelector('.ver-texto').textContent = ligado ? 'Fechar' : 'Ver fotos e líderes';
+    return c;
+  }
+
+  function fechar(devolverFoco) {
+    if (!aberto) return;
+    var c = marcarCartao(aberto, false);
+    aberto = null;
+    painel.hidden = true;
+    painel.innerHTML = '';
+    if (devolverFoco && c) c.focus();
+  }
+
+  document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && aberto) fechar(true); });
 })();
 </script>
 
