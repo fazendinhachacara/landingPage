@@ -318,7 +318,7 @@ a{color:#3F4348}a:hover{color:#1F2124}
     { id: 'qua', dia: 'Quarta-feira', hora: '19h30', h: 19, m: 30, nome: 'Louvor e Palavra', sub: '', quando: function (d) { return d.getDay() === 3; } },
     { id: 'sex', dia: 'Sexta-feira', hora: '19h30', h: 19, m: 30, nome: 'Culto de Ensino', sub: '', quando: function (d) { return d.getDay() === 5; } },
     { id: 'sab', dia: '2º sábado do mês', hora: '18h30', h: 18, m: 30, nome: 'Santa Ceia', sub: '', quando: function (d) { return d.getDay() === 6 && d.getDate() >= 8 && d.getDate() <= 14; } },
-    { id: 'ebd', dia: 'Domingo', hora: '9h', h: 9, m: 0, nome: 'Escola Bíblica Dominical', sub: 'Classes para todas as idades', quando: function (d) { return d.getDay() === 0; } },
+    { id: 'ebd', dia: 'Domingo', hora: '9h', h: 9, m: 0, nome: 'Escola Bíblica Dominical', sub: 'Classes para todas as idades', rotulo: 'Próxima aula', quando: function (d) { return d.getDay() === 0; } },
     { id: 'dom', dia: 'Domingo', hora: '18h30', h: 18, m: 30, nome: '', sub: '', quando: function (d) { return d.getDay() === 0; } }
   ];
   // Culto de domingo conforme a semana do mês (3º, 4º e 5º domingo)
@@ -354,6 +354,7 @@ a{color:#3F4348}a:hover{color:#1F2124}
         var ini = inicio(d, c);
         if (ini.getTime() + DURACAO_MS <= agora.getTime()) continue;
         proxId = c.id;
+        etiqueta = c.rotulo || 'Próximo culto';
         var dd = ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2);
         if (agora >= ini) { etiqueta = 'Acontecendo agora'; quando = 'Hoje, ' + c.hora; }
         else if (i === 0) quando = 'Hoje, ' + c.hora;
