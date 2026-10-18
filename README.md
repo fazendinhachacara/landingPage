@@ -9,7 +9,7 @@ Landing page da Assembleia de Deus Chácara Fazendinha.
 O endereço do site não muda com as atualizações, então o QR Code impresso continua funcionando.
 
 ## Pedidos de oração e visita
-A seção de pedidos no site grava no Firebase (plano gratuito), e a liderança consulta em `pedidos.html`.
+A seção de pedidos no site grava no Firebase (plano gratuito), e a liderança consulta em https://fazendinhachacara.github.io/landingPage/pedidos.
 
 **Antes de funcionar, é preciso configurar o Firebase uma vez.** O passo a passo está em [CONFIGURACAO-FIREBASE.md](CONFIGURACAO-FIREBASE.md).
 

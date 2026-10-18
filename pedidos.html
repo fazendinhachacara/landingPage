@@ -147,6 +147,11 @@ import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore, collection, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp, deleteField } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
+// Quem abrir pelo link antigo, com .html, vê o endereço limpo na barra. A página não recarrega.
+if (location.pathname.endsWith('/pedidos.html')) {
+  history.replaceState(null, '', location.pathname.slice(0, -'.html'.length) + location.search + location.hash);
+}
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);

@@ -75,14 +75,14 @@ export const firebaseConfig = {
 
 1. Envie as alterações para o GitHub (`git push`). O GitHub Pages atualiza sozinho em um ou dois minutos.
 2. Abra o site e envie um pedido de teste em cada um dos dois formulários.
-3. Abra `SEU-SITE/pedidos.html`, entre com um dos e-mails cadastrados no passo 4 e confira se os dois pedidos apareceram.
+3. Abra `SEU-SITE/pedidos`, entre com um dos e-mails cadastrados no passo 4 e confira se os dois pedidos apareceram.
 4. Apague os pedidos de teste pelo console do Firebase (Firestore Database → coleção `pedidos`). De propósito, não dá para apagar pela página.
 
 ---
 
 ## Como a liderança usa no dia a dia
 
-Entre em `SEU-SITE/pedidos.html` pelo celular ou computador e faça login. Dá para:
+Entre em `SEU-SITE/pedidos` pelo celular ou computador e faça login. Dá para:
 
 - Filtrar por **tipo** (oração ou visita) e por **situação** (pendentes, atendidos, todos).
 - Clicar no telefone para abrir direto a conversa no WhatsApp.
