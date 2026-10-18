@@ -403,13 +403,14 @@ a{color:#3F4348}a:hover{color:#1F2124}
 (function () {
   // ===== Grupos (edite aqui) =====
   // lideres.foto: caminho da foto dos líderes; vazio mostra um espaço reservado.
+  // lideres.posicao: enquadramento da foto (object-position), para não cortar os rostos.
   // fotos: aparecem no carrossel, na ordem da lista.
   var GRUPOS = [
     {
       id: 'vozes', nome: 'Vozes de Sião', sub: 'Irmãs · Círculo de Oração', cor: '#E07FA6',
       logo: 'img/vozes-de-siao.png', logoEstilo: 'object-fit: cover; background: #FFFFFF',
       horarios: [['Culto', 'toda segunda-feira, 19h30'], ['Ensaio', '1º e 3º domingo do mês, 17h']],
-      lideres: { foto: '', nomes: '' },
+      lideres: { foto: 'img/grupos/vozes-lideres.jpg', posicao: 'center 35%', nomes: 'Conceição, Valdirene e Elineia' },
       fotos: [{ src: 'img/grupos/vozes-1.jpg', alt: 'Integrantes reunidos no templo, de preto com lenço vermelho' }]
     },
     {
@@ -430,10 +431,12 @@ a{color:#3F4348}a:hover{color:#1F2124}
       id: 'cordeirinhos', nome: 'Cordeirinhos de Jesus', sub: 'Crianças', cor: 'linear-gradient(120deg, #F5C842, #EE86B0)',
       logo: 'img/cordeirinhos-de-jesus.png', logoEstilo: 'object-fit: contain; padding: 8px; box-sizing: border-box; background: #FFFFFF',
       horarios: [['Culto', '5º domingo do mês, 18h30'], ['Ensaio', 'domingos, 10h30']],
-      lideres: { foto: '', nomes: '' },
+      lideres: { foto: 'img/grupos/cordeirinhos-lideres.jpg', posicao: 'center 15%', nomes: 'Samuel e Camilly' },
       fotos: [
         { src: 'img/grupos/cordeirinhos-1.jpg', alt: 'Crianças com a professora na festa do Dia das Crianças' },
-        { src: 'img/grupos/cordeirinhos-2.jpg', alt: 'Crianças com a Bíblia aberta durante a aula' }
+        { src: 'img/grupos/cordeirinhos-2.jpg', alt: 'Crianças com a Bíblia aberta durante a aula' },
+        { src: 'img/grupos/cordeirinhos-3.jpg', alt: 'Crianças e professores de roxo no altar decorado com o tema Deus que faz milagres' },
+        { src: 'img/grupos/cordeirinhos-4.jpg', alt: 'Crianças e professores de camiseta branca no Congresso com as Crianças, diante de um castelo azul e dourado' }
       ]
     },
     {
@@ -489,7 +492,7 @@ a{color:#3F4348}a:hover{color:#1F2124}
 
   function htmlLideres(l) {
     var foto = l.foto
-      ? '<img class="foto" src="' + esc(l.foto) + '" alt="Líderes do grupo: ' + esc(l.nomes) + '">'
+      ? '<img class="foto" src="' + esc(l.foto) + '"' + (l.posicao ? ' style="object-position: ' + esc(l.posicao) + '"' : '') + ' alt="Líderes do grupo: ' + esc(l.nomes) + '">'
       : '<div class="sem-foto">' + PESSOAS + '<span>Foto dos líderes em breve</span></div>';
     return '<div class="lideres">' + foto + '<div class="quem"><span class="rotulo">Líderes</span><span class="nomes">' + esc(l.nomes || 'A definir') + '</span></div></div>';
   }
