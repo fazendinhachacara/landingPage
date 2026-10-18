@@ -62,6 +62,15 @@ main{max-width:1120px;margin:0 auto;padding:40px 24px 80px}
 .acoes{display:flex;flex-wrap:wrap;gap:8px;padding-top:12px;border-top:1px solid #EFE8DC}
 .vazio{grid-column:1/-1;text-align:center;color:#5A5E63;padding:60px 24px;background:#FFFFFF;border:1px dashed #CFC4B2;border-radius:20px}
 .erro{color:#9B2C2C;font-weight:600}
+
+.modal{width:min(520px,calc(100% - 32px));padding:0;border:1px solid #E2D9CB;border-radius:20px;background:#FFFFFF;color:#24272B;box-shadow:0 20px 60px rgba(36,39,43,.25)}
+.modal::backdrop{background:rgba(36,39,43,.55)}
+.modal form{padding:28px 24px 24px;display:flex;flex-direction:column;gap:16px}
+.modal h2{margin:0;font-family:'Bricolage Grotesque',Georgia,serif;font-size:24px;line-height:1.2}
+.modal .contexto{margin:-8px 0 0;font-size:15px;color:#5A5E63;overflow-wrap:anywhere}
+.modal textarea{width:100%;min-height:140px;padding:12px 14px;border:1px solid #CFC4B2;border-radius:12px;background:#FFFFFF;font:inherit;font-weight:400;color:#24272B;resize:vertical}
+.modal .rodape{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px}
+.modal .restante{margin-right:auto;font-size:14px;color:#5A5E63}
 </style>
 </head>
 <body>
@@ -106,10 +115,29 @@ main{max-width:1120px;margin:0 auto;padding:40px 24px 80px}
 <option value="todos">Todos</option>
 </select>
 </label>
+<label class="campo" style="margin:0"><span>Mês</span>
+<select id="filtro-mes"></select>
+</label>
 <span class="contagem" id="contagem"></span>
 </div>
 <div class="lista" id="lista"></div>
 </div>
+
+<dialog class="modal" id="modal-anotacao" aria-labelledby="modal-titulo">
+<form method="dialog" id="form-anotacao">
+<h2 id="modal-titulo">Anotação</h2>
+<p class="contexto" id="modal-contexto"></p>
+<label class="campo" style="margin:0"><span>O que a liderança precisa saber sobre este pedido</span>
+<textarea name="observacao" maxlength="500" rows="5" placeholder="Ex.: Liguei no dia 20, a cirurgia foi remarcada."></textarea>
+</label>
+<p id="modal-status" class="erro" role="status" aria-live="polite" style="margin:0" hidden></p>
+<div class="rodape">
+<span class="restante" id="modal-restante"></span>
+<button type="button" class="btn secundario pequeno" id="modal-cancelar">Cancelar</button>
+<button type="submit" class="btn pequeno">Salvar</button>
+</div>
+</form>
+</dialog>
 
 </main>
 
@@ -131,8 +159,15 @@ const lista = document.getElementById('lista');
 const contagem = document.getElementById('contagem');
 const filtroTipo = document.getElementById('filtro-tipo');
 const filtroStatus = document.getElementById('filtro-status');
+const filtroMes = document.getElementById('filtro-mes');
+const modal = document.getElementById('modal-anotacao');
+const formAnotacao = document.getElementById('form-anotacao');
+const modalContexto = document.getElementById('modal-contexto');
+const modalStatus = document.getElementById('modal-status');
+const modalRestante = document.getElementById('modal-restante');
 
 let pedidos = [];
+let pedidoAnotado = null;
 let parar = null;
 
 const MENSAGENS = {
@@ -203,6 +238,68 @@ function dataLegivel(ts) {
   if (!ts || !ts.toDate) return 'agora mesmo';
   return ts.toDate().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
+
+function dataDoPedido(p) {
+  return p.criadoEm && p.criadoEm.toDate ? p.criadoEm.toDate() : new Date();
+}
+
+function chaveMes(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+function nomeMes(chave) {
+  const [ano, mes] = chave.split('-').map(Number);
+  const nome = new Date(ano, mes - 1, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  return nome.charAt(0).toUpperCase() + nome.slice(1);
+}
+
+function montarMeses() {
+  const atual = chaveMes(new Date());
+  const escolhido = filtroMes.value || atual;
+  const meses = new Set([atual, escolhido, ...pedidos.map(p => chaveMes(dataDoPedido(p)))]);
+  meses.delete('todos');
+  filtroMes.innerHTML = '';
+  [...meses].sort().reverse().forEach(chave => filtroMes.add(new Option(nomeMes(chave), chave)));
+  filtroMes.add(new Option('Todos os meses', 'todos'));
+  filtroMes.value = escolhido;
+}
+
+function abrirAnotacao(p) {
+  pedidoAnotado = p;
+  const quem = p.anonimo ? 'Pedido anônimo' : (p.nome || 'Sem nome informado');
+  modalContexto.textContent = (p.tipo === 'visita' ? 'Visita' : 'Oração') + ' · ' + quem + ' · ' + dataLegivel(p.criadoEm);
+  formAnotacao.elements.observacao.value = p.observacao || '';
+  modalStatus.hidden = true;
+  atualizarRestante();
+  modal.showModal();
+  formAnotacao.elements.observacao.focus();
+}
+
+function atualizarRestante() {
+  const sobra = 500 - formAnotacao.elements.observacao.value.length;
+  modalRestante.textContent = sobra === 1 ? '1 caractere restante' : sobra + ' caracteres restantes';
+}
+
+formAnotacao.elements.observacao.addEventListener('input', atualizarRestante);
+document.getElementById('modal-cancelar').addEventListener('click', () => modal.close());
+modal.addEventListener('click', (ev) => { if (ev.target === modal) modal.close(); });
+
+formAnotacao.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const botao = formAnotacao.querySelector('button[type="submit"]');
+  botao.disabled = true;
+  modalStatus.hidden = true;
+  try {
+    await updateDoc(doc(db, 'pedidos', pedidoAnotado.id), { observacao: formAnotacao.elements.observacao.value.trim().slice(0, 500) });
+    modal.close();
+  } catch (e) {
+    console.error(e);
+    modalStatus.textContent = 'Não foi possível salvar. Verifique a internet e tente de novo.';
+    modalStatus.hidden = false;
+  } finally {
+    botao.disabled = false;
+  }
+});
 
 function soDigitos(t) { return String(t || '').replace(/\D/g, ''); }
 
@@ -292,13 +389,7 @@ function cartao(p) {
   anotar.type = 'button';
   anotar.className = 'btn secundario pequeno';
   anotar.textContent = p.observacao ? 'Editar anotação' : 'Anotar';
-  anotar.addEventListener('click', async () => {
-    const texto = window.prompt('Anotação sobre este pedido:', p.observacao || '');
-    if (texto === null) return;
-    try {
-      await updateDoc(doc(db, 'pedidos', p.id), { observacao: texto.trim().slice(0, 500) });
-    } catch (e) { console.error(e); }
-  });
+  anotar.addEventListener('click', () => abrirAnotacao(p));
   acoes.append(anotar);
 
   card.append(acoes);
@@ -308,9 +399,12 @@ function cartao(p) {
 function desenhar() {
   const tipo = filtroTipo.value;
   const status = filtroStatus.value;
+  montarMeses();
+  const mes = filtroMes.value;
   const visiveis = pedidos.filter(p =>
     (tipo === 'todos' || p.tipo === tipo) &&
-    (status === 'todos' || (p.status || 'pendente') === status)
+    (status === 'todos' || (p.status || 'pendente') === status) &&
+    (mes === 'todos' || chaveMes(dataDoPedido(p)) === mes)
   );
 
   lista.innerHTML = '';
@@ -327,6 +421,7 @@ function desenhar() {
 
 filtroTipo.addEventListener('change', desenhar);
 filtroStatus.addEventListener('change', desenhar);
+filtroMes.addEventListener('change', desenhar);
 </script>
 
 </body>
