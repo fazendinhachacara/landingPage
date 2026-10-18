@@ -97,6 +97,10 @@ a{color:#3F4348}a:hover{color:#1F2124}
 .pontos button[aria-current="true"]::before{background:#3F4348;transform:scale(1.2)}
 .pontos button:focus-visible{outline:3px solid #2F68B0;outline-offset:0;border-radius:50%}
 .contador{font-size:14px;color:#5A5E63;font-variant-numeric:tabular-nums}
+.carrossel-rodape .direita{display:flex;align-items:center;gap:8px}
+.pausar{width:36px;height:36px;border-radius:50%;border:1.5px solid #CFC4B2;background:#FFFFFF;color:#24272B;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.pausar:hover{border-color:#24272B}
+.pausar:focus-visible{outline:3px solid #2F68B0;outline-offset:2px}
 .sem-fotos{border-radius:16px;aspect-ratio:4/3;background:#FFFFFF;border:1px dashed #CFC4B2;color:#5A5E63;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;box-sizing:border-box}
 
 @media (max-width: 760px){
@@ -503,41 +507,86 @@ a{color:#3F4348}a:hover{color:#1F2124}
           '<button type="button" class="seta prox" aria-label="Próxima foto"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>' +
           '<div class="carrossel-rodape"><div class="pontos">' +
           g.fotos.map(function (_f, i) { return '<button type="button" aria-label="Ver foto ' + (i + 1) + '"></button>'; }).join('') +
-          '</div><span class="contador"></span></div>'
+          '</div><div class="direita"><span class="contador"></span><button type="button" class="pausar"></button></div></div>'
         : '') +
       '</div>';
   }
 
+  var TROCA_MS = 5000; // tempo de cada foto na troca automática
+  var PAUSA = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg>';
+  var PLAY = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"></path></svg>';
+  var timer = null, observador = null, reagendar = null;
+
+  function pararCarrossel() {
+    clearInterval(timer); timer = null;
+    if (observador) { observador.disconnect(); observador = null; }
+    reagendar = null;
+  }
+
+  document.addEventListener('visibilitychange', function () { if (reagendar) reagendar(); });
+
   function ligarCarrossel() {
     var trilho = painel.querySelector('.trilho');
     if (!trilho) return;
+    var carrossel = painel.querySelector('.carrossel');
     var pontos = painel.querySelectorAll('.pontos button');
     var ant = painel.querySelector('.seta.ant');
     var prox = painel.querySelector('.seta.prox');
     var contador = painel.querySelector('.contador');
+    var pausar = painel.querySelector('.pausar');
     var total = trilho.children.length;
+    // Pausa pedida pela pessoa (botão) e pausas temporárias (dedo/mouse em cima, fora da tela).
+    var pausadoPeloUsuario = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var emUso = false, visivel = true;
+
     function atual() { return Math.round(trilho.scrollLeft / (trilho.clientWidth || 1)); }
-    function ir(i) { trilho.scrollTo({ left: Math.max(0, Math.min(total - 1, i)) * trilho.clientWidth }); }
+    function ir(i) { trilho.scrollTo({ left: ((i % total) + total) % total * trilho.clientWidth }); }
     function marcar() {
       var i = atual();
       for (var k = 0; k < pontos.length; k++) pontos[k].setAttribute('aria-current', k === i ? 'true' : 'false');
-      if (ant) ant.disabled = i === 0;
-      if (prox) prox.disabled = i === total - 1;
       if (contador) contador.textContent = (i + 1) + ' / ' + total;
     }
-    for (var k = 0; k < pontos.length; k++) (function (n) { pontos[n].addEventListener('click', function () { ir(n); }); })(k);
-    if (ant) ant.addEventListener('click', function () { ir(atual() - 1); });
-    if (prox) prox.addEventListener('click', function () { ir(atual() + 1); });
+    function agendar() {
+      clearInterval(timer); timer = null;
+      if (total < 2 || pausadoPeloUsuario || emUso || !visivel || document.hidden) return;
+      timer = setInterval(function () { ir(atual() + 1); }, TROCA_MS);
+    }
+    function irManual(i) { ir(i); agendar(); }
+    function desenharPausa() {
+      if (!pausar) return;
+      pausar.innerHTML = pausadoPeloUsuario ? PLAY : PAUSA;
+      pausar.setAttribute('aria-label', pausadoPeloUsuario ? 'Retomar troca automática das fotos' : 'Pausar troca automática das fotos');
+    }
+
+    for (var k = 0; k < pontos.length; k++) (function (n) { pontos[n].addEventListener('click', function () { irManual(n); }); })(k);
+    if (ant) ant.addEventListener('click', function () { irManual(atual() - 1); });
+    if (prox) prox.addEventListener('click', function () { irManual(atual() + 1); });
+    if (pausar) pausar.addEventListener('click', function () { pausadoPeloUsuario = !pausadoPeloUsuario; desenharPausa(); agendar(); });
     trilho.addEventListener('scroll', marcar, { passive: true });
     trilho.addEventListener('keydown', function (ev) {
-      if (ev.key === 'ArrowRight') { ev.preventDefault(); ir(atual() + 1); }
-      if (ev.key === 'ArrowLeft') { ev.preventDefault(); ir(atual() - 1); }
+      if (ev.key === 'ArrowRight') { ev.preventDefault(); irManual(atual() + 1); }
+      if (ev.key === 'ArrowLeft') { ev.preventDefault(); irManual(atual() - 1); }
     });
+    function emUsoSim() { emUso = true; agendar(); }
+    function emUsoNao() { emUso = false; agendar(); }
+    trilho.addEventListener('touchstart', emUsoSim, { passive: true });
+    trilho.addEventListener('touchend', emUsoNao, { passive: true });
+    trilho.addEventListener('touchcancel', emUsoNao, { passive: true });
+    carrossel.addEventListener('mouseenter', emUsoSim);
+    carrossel.addEventListener('mouseleave', emUsoNao);
+    if ('IntersectionObserver' in window) {
+      observador = new IntersectionObserver(function (e) { visivel = e[0].isIntersecting; agendar(); }, { threshold: 0.5 });
+      observador.observe(carrossel);
+    }
+    reagendar = agendar;
+    desenharPausa();
     marcar();
+    agendar();
   }
 
   function abrir(g, cartao) {
     if (aberto) marcarCartao(aberto, false);
+    pararCarrossel();
     aberto = g.id;
     marcarCartao(g.id, true);
     painel.setAttribute('aria-label', g.nome);
@@ -568,6 +617,7 @@ a{color:#3F4348}a:hover{color:#1F2124}
     if (!aberto) return;
     var c = marcarCartao(aberto, false);
     aberto = null;
+    pararCarrossel();
     painel.hidden = true;
     painel.innerHTML = '';
     if (devolverFoco && c) c.focus();
